@@ -15,7 +15,7 @@ void setup() {
     value = EEPROM.read(i);
     if(value!=0)
     {
-      Serial.print(address);
+      Serial.print(i);
       Serial.print("\t");
       Serial.print(value, DEC);
       Serial.println();
@@ -35,7 +35,7 @@ void setup() {
 }
 
 void loop() {
-  bool led_signal = digitalRead(2);
+  int led_signal = digitalRead(2);
   if(led_signal==0 && sflag==0)
   {
     Serial.println("Started Charging!!");
@@ -46,8 +46,10 @@ void loop() {
   else if(led_signal==1 && sflag==1)
   {
     int t2 = millis();
+    int t_now = millis();
     cflag = 1;
-    while((millis()-t2)/1000<30.0)
+    delay(1000);
+    while((t_now-t2)<30000)
     {
       Serial.println("Checking if charging is done");
       led_signal = digitalRead(2);
@@ -58,7 +60,7 @@ void loop() {
         Serial.println("No just noise.... Continue Charging.....");
         break;
       }
-      delay(50);
+      t_now = millis();
     }
     if(cflag==1)
     {
@@ -72,10 +74,7 @@ void loop() {
       Serial.println("Writing to EEPROM....");
       address=address+1;
       sflag=0;
-      for(int i=0;i<3;i++)
-      {
-        ring_the_bell();
-      }
+      ring_the_bell();
     }
   }
   delay(2000);
@@ -89,5 +88,11 @@ void erase_eeprom()
 }
 void ring_the_bell()
 {
-  tone(13, 1500, 1000);
+  for(int i=0;i<3;i++)
+  {
+    tone(13, 1000); // Send 1KHz sound signal...
+    delay(1000);        // ...for 1 sec
+    noTone(13);     // Stop sound...
+    delay(1000);        // ...for 1sec
+  }
 }
